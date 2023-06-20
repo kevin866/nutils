@@ -13,7 +13,10 @@ import numpy
 import treelog
 
 
-def main(nrefine: int, traction: float, radius: float, poisson: float):
+def main(nrefine: int = 2,
+         traction: float = 0.1,
+         radius: float = 0.5,
+         poisson: float = 0.3):
     '''
     Horizontally loaded linear elastic plate with IGA hole.
 

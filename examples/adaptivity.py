@@ -21,7 +21,10 @@ import numpy
 import treelog
 
 
-def main(etype: str, btype: str, degree: int, nrefine: int):
+def main(etype: str = 'square',
+         btype: str = 'h-std',
+         degree: int = 2,
+         nrefine: int = 5):
     '''
     Adaptively refined Laplace problem on an L-shaped domain.
 

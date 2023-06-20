@@ -13,7 +13,14 @@ import numpy
 import treelog
 
 
-def main(nelems: int, etype: str, btype: str, degree: int, traction: float, maxrefine: int, radius: float, poisson: float):
+def main(nelems: int = 9,
+         etype: str = 'square',
+         btype: str = 'std',
+         degree: int = 2,
+         traction: float = 0.1,
+         maxrefine: int = 2,
+         radius: float = 0.5,
+         poisson: float = 0.3):
     '''
     Horizontally loaded linear elastic plate with FCM hole.
 

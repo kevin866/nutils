@@ -11,7 +11,14 @@ from nutils.expression_v2 import Namespace
 import numpy
 
 
-def main(nelems: int, etype: str, btype: str, degree: int, poisson: float, angle: float, restol: float, trim: bool):
+def main(nelems: int = 10,
+         etype: str = 'square',
+         btype: str = 'std',
+         degree: int = 1,
+         poisson: float = 0.25,
+         angle: float = 20.,
+         restol: float = 1e-8,
+         trim: bool = False):
     '''
     Deformed hyperelastic plate.
 

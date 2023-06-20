@@ -25,7 +25,10 @@ from nutils.expression_v2 import Namespace
 import treelog
 
 
-def main(nelems: int, etype: str, btype: str, degree: int):
+def main(nelems: int = 10,
+         etype: str = 'square',
+         btype: str = 'std',
+         degree: int = 1):
     '''
     Laplace problem on a unit square.
 

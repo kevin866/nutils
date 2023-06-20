@@ -10,7 +10,14 @@ import numpy
 import treelog
 
 
-def main(nelems: int, ndims: int, btype: str, degree: int, timescale: float, newtontol: float, endtime: float):
+def main(
+        nelems: int = 20,
+        ndims: int = 1,
+        btype: str = 'discont',
+        degree: int = 1,
+        timescale: float = 0.5,
+        newtontol: float = 1e-5,
+        endtime: float = 1.):
     '''
     Burgers equation on a 1D or 2D periodic domain.
 

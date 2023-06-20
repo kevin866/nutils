@@ -8,7 +8,7 @@
 from nutils import mesh, function, solver, export, cli, testing
 
 
-def main(nelems: int):
+def main(nelems: int = 10):
     '''
     Poisson's equation on a unit square.
 

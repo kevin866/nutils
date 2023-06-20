@@ -8,7 +8,11 @@ from nutils import mesh, function, solver, export, cli, testing
 from nutils.expression_v2 import Namespace
 
 
-def main(nelems: int, etype: str, btype: str, degree: int, poisson: float):
+def main(nelems: int = 10,
+         etype: str = 'square',
+         btype: str = 'std',
+         degree: int = 1,
+         poisson: float = 0.25):
     '''
     Horizontally loaded linear elastic plate.
 

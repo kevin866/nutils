@@ -61,7 +61,12 @@ import treelog as log
 import numpy
 
 
-def main(nelems: int, etype: str, degree: int, reynolds: float, compatible: bool, strongbc: bool):
+def main(nelems: int = 32,
+         etype: str = 'square',
+         degree: int = 2,
+         reynolds: float = 1000.,
+         compatible: bool = False,
+         strongbc: bool = False):
     '''
     Driven cavity benchmark problem.
 

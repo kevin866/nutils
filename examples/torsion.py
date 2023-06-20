@@ -27,9 +27,16 @@ import treelog as log
 import numpy as np
 
 
-def main(length: float, thickness: float, rotation: float, increment: float,
-         elemsize: float, poisson: float, restol: float, trim: float,
-         stretch: float, degree: int):
+def main(length: float = 6.283,
+         thickness: float = 0.5,
+         rotation: float = 90.,
+         increment: float = 5.,
+         elemsize: float = 0.5,
+         poisson: float = 0.4,
+         restol: float = 1e-8,
+         trim: float = 1.57,
+         stretch: float = 1.0,
+         degree: int = 2):
     '''
     Deformed hyperelastic plate. All dimensions are normalized to the tube radius.
 

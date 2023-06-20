@@ -118,7 +118,13 @@ class PostProcessor:
         self.regularize_xgrd()
 
 
-def main(nelems: int, degree: int, reynolds: float, uwall: float, timestep: float, extdiam: float, endtime: float):
+def main(nelems: int = 63,
+         degree: int = 3,
+         reynolds: float = 1000.,
+         uwall: float = 0.,
+         timestep: float = 0.04,
+         extdiam: float = 50.,
+         endtime: float = 1.):
     '''
     Flow around a cylinder.
 

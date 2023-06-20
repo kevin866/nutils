@@ -46,7 +46,12 @@ import functools
 import numpy
 
 
-def main(nelems: int = 50, degree: int = 3, freq: float = 0., nturns: int = 1, rwire: float = .0025, rcoil: float = 0.025):
+def main(nelems: int = 50,
+         degree: int = 3,
+         freq: float = 0.,
+         nturns: int = 1,
+         rwire: float = .0025,
+         rcoil: float = 0.025):
 
     ns = Namespace()
     ns.j = 1j
