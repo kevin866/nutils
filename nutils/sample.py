@@ -15,14 +15,13 @@ selected sample points, and is typically used in combination with the "bezier"
 set.
 '''
 
-from . import types, points, _util as util, function, evaluable, parallel, matrix, sparse, warnings
+from . import types, _util as util, function, evaluable, warnings
 from .pointsseq import PointsSequence
 from .transformseq import Transforms
 from ._backports import cached_property
 from typing import Iterable, Mapping, Optional, Sequence, Tuple, Union
 import numpy
 import numbers
-import collections.abc
 import os
 import treelog as log
 import abc
@@ -30,12 +29,6 @@ import abc
 _PointsShape = Tuple[evaluable.Array, ...]
 _TransformChainsMap = Mapping[str, Tuple[Tuple[Transforms, ...], int]]
 _CoordinatesMap = Mapping[str, evaluable.Array]
-
-
-def argdict(arguments) -> Mapping[str, numpy.ndarray]:
-    if len(arguments) == 1 and 'arguments' in arguments and isinstance(arguments['arguments'], collections.abc.Mapping):
-        return arguments['arguments']
-    return arguments
 
 
 class Sample(types.Singleton):
@@ -161,9 +154,9 @@ class Sample(types.Singleton):
     def get_lower_args(self, __ielem: evaluable.Array) -> function.LowerArgs:
         raise NotImplementedError
 
-    @util.positional_only
     @util.single_or_multiple
-    def integrate(self, funcs: Iterable[function.IntoArray], arguments: Mapping[str, numpy.ndarray] = ...) -> Tuple[numpy.ndarray, ...]:
+    @util.positional_only
+    def integrate(self, funcs, arguments=...):
         '''Integrate functions.
 
         Args
@@ -174,13 +167,11 @@ class Sample(types.Singleton):
             Optional arguments for function evaluation.
         '''
 
-        funcs, funcscales = zip(*map(function.Array.cast_withscale, funcs))
-        datas = self.integrate_sparse(funcs, argdict(arguments))
-        with log.iter.fraction('assembling', datas) as items:
-            return tuple(_convert(data, inplace=True) * scale for data, scale in zip(items, funcscales))
+        return function.evaluate(*funcs, pre=self.__integral__, post=function._convert, arguments=arguments)
 
     @util.single_or_multiple
-    def integrate_sparse(self, funcs: Iterable[function.IntoArray], arguments: Optional[Mapping[str, numpy.ndarray]] = None) -> Tuple[numpy.ndarray, ...]:
+    @util.positional_only
+    def integrate_sparse(self, funcs, arguments=...):
         '''Integrate functions into sparse data.
 
         Args
@@ -191,7 +182,7 @@ class Sample(types.Singleton):
             Optional arguments for function evaluation.
         '''
 
-        return evaluable.eval_sparse(map(self.integral, funcs), **(arguments or {}))
+        return function.evaluate(*funcs, pre=self.__integral__, post=None, arguments=arguments)
 
     def integral(self, __func: function.IntoArray) -> function.Array:
         '''Create Integral object for postponed integration.
@@ -202,12 +193,11 @@ class Sample(types.Singleton):
             Integrand.
         '''
 
-        func, funcscale = function.Array.cast_withscale(__func)
-        return _Integral(func, self) * funcscale
+        return function.integral(__func, self)
 
-    @util.positional_only
     @util.single_or_multiple
-    def eval(self, funcs: Iterable[function.IntoArray], arguments: Mapping[str, numpy.ndarray] = ...) -> Tuple[numpy.ndarray, ...]:
+    @util.positional_only
+    def eval(self, funcs, arguments=...):
         '''Evaluate function.
 
         Args
@@ -218,14 +208,11 @@ class Sample(types.Singleton):
             Optional arguments for function evaluation.
         '''
 
-        funcs, funcscales = zip(*map(function.Array.cast_withscale, funcs))
-        datas = self.eval_sparse(funcs, arguments)
-        with log.iter.fraction('assembling', datas) as items:
-            return tuple(sparse.toarray(data) * funcscale for data, funcscale in zip(datas, funcscales))
+        return function.evaluate(*funcs, pre=self, arguments=arguments)
 
-    @util.positional_only
     @util.single_or_multiple
-    def eval_sparse(self, funcs: Iterable[function.IntoArray], arguments: Optional[Mapping[str, numpy.ndarray]] = None) -> Tuple[numpy.ndarray, ...]:
+    @util.positional_only
+    def eval_sparse(self, funcs, arguments=...):
         '''Evaluate function.
 
         Args
@@ -236,13 +223,24 @@ class Sample(types.Singleton):
             Optional arguments for function evaluation.
         '''
 
-        return evaluable.eval_sparse(map(self, funcs), **(arguments or {}))
+        return function.evaluate(*funcs, pre=self, post=None, arguments=arguments)
+
+    def __integral__(self, __func: function.IntoArray) -> function.Array:
+        '''Create Integral object for postponed integration.
+
+        Args
+        ----
+        func : :class:`nutils.function.Array`
+            Integrand.
+        '''
+
+        return _Integral(function.Array.cast(__func), self)
 
     def __call__(self, __func: function.IntoArray) -> function.Array:
-        func, funcscale = function.Array.cast_withscale(__func)
+        func = function.Array.cast(__func)
         ielem = evaluable.loop_index('_sample_' + '_'.join(self.spaces), self.nelems)
         indices = evaluable.loop_concatenate(evaluable._flat(self.get_evaluable_indices(ielem)), ielem)
-        return _ReorderPoints(_ConcatenatePoints(func, self), indices) * funcscale
+        return _ReorderPoints(_ConcatenatePoints(func, self), indices)
 
     def basis(self, interpolation: str = 'none') -> function.Array:
         '''Basis-like function that for every point in the sample evaluates to the
@@ -449,8 +447,7 @@ class _DefaultIndex(_TransformChainsSample):
         return evaluable.Range(npoints) + offset
 
     def __call__(self, __func: function.IntoArray) -> function.Array:
-        func, funcscale = function.Array.cast_withscale(__func)
-        return _ConcatenatePoints(func, self) * funcscale
+        return _ConcatenatePoints(function.Array.cast(__func), self)
 
 
 class _CustomIndex(_TransformChainsSample):
@@ -536,13 +533,13 @@ class _Empty(_TensorialSample):
     def take_elements(self, __indices: numpy.ndarray) -> Sample:
         return self
 
-    def integral(self, __func: function.IntoArray) -> function.Array:
+    def __integral__(self, __func: function.IntoArray) -> function.Array:
         func = function.Array.cast(__func)
         return function.zeros(func.shape, func.dtype)
 
     def __call__(self, __func: function.IntoArray) -> function.Array:
-        func, funcscale = function.Array.cast_withscale(__func)
-        return function.zeros((0, *func.shape), func.dtype) * funcscale
+        func = function.Array.cast(__func)
+        return function.zeros((0, *func.shape), func.dtype)
 
     def basis(self, interpolation: str = 'none') -> function.Array:
         return function.zeros((0,), float)
@@ -588,10 +585,11 @@ class _Add(_TensorialSample):
         sample2 = self._sample2.take_elements(__indices[~mask] - self._sample1.nelems)
         return sample1 + sample2
 
-    def integral(self, func: function.IntoArray) -> function.Array:
+    def __integral__(self, func: function.IntoArray) -> function.Array:
         return self._sample1.integral(func) + self._sample2.integral(func)
 
     def __call__(self, func: function.IntoArray) -> function.Array:
+        func = function.Array.cast(func)
         return numpy.concatenate([self._sample1(func), self._sample2(func)])
 
 
@@ -788,10 +786,11 @@ class _Mul(_TensorialSample):
     def hull(self) -> numpy.ndarray:
         return self._tri_hull(with_hull=True)[1]
 
-    def integral(self, func: function.IntoArray) -> function.Array:
+    def __integral__(self, func: function.IntoArray) -> function.Array:
         return self._sample1.integral(self._sample2.integral(func))
 
     def __call__(self, func: function.IntoArray) -> function.Array:
+        func = function.Array.cast(func)
         return numpy.reshape(self._sample1(self._sample2(func)), (-1, *func.shape))
 
     def basis(self, interpolation: str = 'none') -> Sample:
@@ -914,8 +913,13 @@ class _TakeElements(_TensorialSample):
         return self._parent.take_elements(numpy.take(self._indices, __indices))
 
 
-def eval_integrals(*integrals: evaluable.AsEvaluableArray, **arguments: Mapping[str, numpy.ndarray]) -> Tuple[Union[numpy.ndarray, matrix.Matrix], ...]:
-    '''Evaluate integrals.
+@util.positional_only
+def eval_integrals(*integrals: evaluable.AsEvaluableArray, arguments: Mapping[str, numpy.ndarray] = ...) -> Tuple[Union[numpy.ndarray, 'matrix.Matrix'], ...]:
+    '''
+    .. deprecated:: 7.0
+        sample.eval_integrals is deprecated, use function.eval instead
+
+    Evaluate integrals.
 
     Evaluate one or several postponed integrals. By evaluating them
     simultaneously, rather than using :meth:`nutils.function.Array.eval` on each
@@ -934,11 +938,12 @@ def eval_integrals(*integrals: evaluable.AsEvaluableArray, **arguments: Mapping[
     results : :class:`tuple` of arrays and/or :class:`nutils.matrix.Matrix` objects.
     '''
 
-    with log.iter.fraction('assembling', evaluable.eval_sparse(integrals, **argdict(arguments))) as retvals:
-        return tuple(_convert(retval, inplace=True) for retval in retvals)
+    warnings.deprecation('sample.eval_integrals_sparse is deprecated, use function.eval instead')
+    return function.evaluate(*integrals, post=function._convert, arguments=arguments)
 
 
-def eval_integrals_sparse(*integrals: evaluable.AsEvaluableArray, **arguments: Mapping[str, numpy.ndarray]) -> Tuple[numpy.ndarray, ...]:
+@util.positional_only
+def eval_integrals_sparse(*integrals: evaluable.AsEvaluableArray, arguments: Mapping[str, numpy.ndarray] = ...) -> Tuple[numpy.ndarray, ...]:
     '''
     .. deprecated:: 7.0
         sample.eval_integrals_sparse is deprecated, use function.eval_sparse instead
@@ -962,23 +967,8 @@ def eval_integrals_sparse(*integrals: evaluable.AsEvaluableArray, **arguments: M
     results : :class:`tuple` of arrays and/or :class:`nutils.matrix.Matrix` objects.
     '''
 
-    warnings.deprecation('sample.eval_integrals_sparse is deprecated, use evaluable.eval_sparse instead')
-    return evaluable.eval_sparse(integrals, **argdict(arguments))
-
-
-def _convert(data: numpy.ndarray, inplace: bool = False) -> Union[numpy.ndarray, matrix.Matrix]:
-    '''Convert a two-dimensional sparse object to an appropriate object.
-
-    The return type is determined based on dimension: a zero-dimensional object
-    becomes a scalar, a one-dimensional object a (dense) Numpy vector, a
-    two-dimensional object a Nutils matrix, and any higher dimensional object a
-    deduplicated and pruned sparse object.
-    '''
-
-    ndim = sparse.ndim(data)
-    return sparse.toarray(data) if ndim < 2 \
-        else matrix.fromsparse(data, inplace=inplace) if ndim == 2 \
-        else sparse.prune(sparse.dedup(data, inplace=inplace), inplace=True)
+    warnings.deprecation('sample.eval_integrals_sparse is deprecated, use function.eval instead')
+    return function.evaluate(*integrals, post=None, arguments=arguments)
 
 
 class _Integral(function.Array):
