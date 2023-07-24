@@ -62,6 +62,7 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [inner_radius, inner_radius, height],
                     [outer_radius, outer_radius, height]])
 
+    cps = np.random.rand(32,3)
     controlweights = np.tile(np.repeat([1., 1 / np.sqrt(2)], 4), 4)
 
     # Create nurbsbasis and geometry
