@@ -4,7 +4,7 @@ import treelog
 import numpy as np
 from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
-
+import custom_shape
 
 def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
     """Creates a periodic hollow cylinder of with defined inner and outer
@@ -63,6 +63,9 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [outer_radius, outer_radius, height]])
 
     cps = np.random.rand(32,3)
+   
+    cps =  custom_shape.generate_cps()
+
     controlweights = np.tile(np.repeat([1., 1 / np.sqrt(2)], 4), 4)
 
     # Create nurbsbasis and geometry
