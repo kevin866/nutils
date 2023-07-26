@@ -18,4 +18,4 @@ def generate_cps(radius = 1, height = 5):
     # Show the plot
     p.show()"""
     return cross.points
-print(generate_cps())
+print(generate_cps().shape)

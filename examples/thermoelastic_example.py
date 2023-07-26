@@ -25,19 +25,35 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
         Domain, geometry and nurbs basis of nutils functions
     """
 
-    domain, geom0 = mesh.rectilinear([4, 1, 1], periodic=[0])
+    """domain, geom0 = mesh.rectilinear([5, 1, 1], periodic=[0])
+    print(domain.basis)
+    print(geom0)
 
     # Knot vector and knot multiplicities
-    kv = [[0, 1, 2, 3, 4], [0, 1], [0, 1]]
-    km = [[2, 2, 2, 2, 2], [2, 2], [2, 2]]
-
+    kv = [[0, 1, 2, 3, 4, 5], [0, 1], [0, 1]]
+    km = [[2, 2, 2, 2, 2, 2], [2, 2], [2, 2]]
+    print("yes")
     bsplinebasis = domain.basis('spline',
                                 degree=(2, 1, 1),
                                 knotmultiplicities=km,
                                 knotvalues=kv,
-                                periodic=[0])
+                                periodic=[0])"""
+    i = 6
+    j = 4
+    k = 6
+    domain, geom0 = mesh.rectilinear([i-1, j-1, k-1], periodic=[0])
+    # Knot vector and knot multiplicities
+    kv = [np.arange(1,i+1), np.arange(0,j), np.arange(0,k)]
+    km = [[2]*i, [2]*j, [2]*k]
+    print(domain)
+    bsplinebasis = domain.basis('spline',
+                                degree=(1, 1, 1),
+                                knotmultiplicities=km,
+                                knotvalues=kv,
+                                periodic=[0]
+                                )
 
-    cps = np.array([[inner_radius, 0, 0], [outer_radius, 0, 0],
+    """cps = np.array([[inner_radius, 0, 0], [outer_radius, 0, 0],
                     [inner_radius, 0, height], [outer_radius, 0, height],
                     [inner_radius, -inner_radius, 0],
                     [outer_radius, -outer_radius, 0],
@@ -61,18 +77,23 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [outer_radius, outer_radius, 0],
                     [inner_radius, inner_radius, height],
                     [outer_radius, outer_radius, height]])
-
-    cps = np.random.rand(32,3)
+"""
+    #cps = np.random.rand(32,3)
+    print(bsplinebasis)
    
     cps =  custom_shape.generate_cps()
+    
 
-    controlweights = np.tile(np.repeat([1., 1 / np.sqrt(2)], 4), 4)
+    controlweights = np.tile(np.repeat([1., 1 / np.sqrt(2)], 15), 20)
+    print(controlweights.shape)
+    
 
     # Create nurbsbasis and geometry
     weightfunc = bsplinebasis.dot(controlweights)
+    print('yes')
     nurbsbasis = bsplinebasis * controlweights / weightfunc
     geom = (nurbsbasis[:, np.newaxis] * cps).sum(0)
-
+    print('yes')
     # Refine domain nrefine times
     if nrefine:
         domain = domain.refine(nrefine)
