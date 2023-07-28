@@ -25,7 +25,7 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
         Domain, geometry and nurbs basis of nutils functions
     """
 
-    domain, geom0 = mesh.rectilinear([4, 1, 1], periodic=[0])
+    domain, geom0 = mesh.unitsquare([4, 1, 1],etype='mixed')
     print(domain.basis)
     print(geom0)
 
