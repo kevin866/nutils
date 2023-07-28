@@ -36,9 +36,9 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                                 knotvalues=kv,
                                 periodic=[0])"""
     
-    i = 6
-    j = 4
-    k = 6
+    i = 5
+    j = 2
+    k = 2
     domain, geom0 = mesh.rectilinear([i-1, j-1, k-1], periodic=[0])
     # Knot vector and knot multiplicities
     kv = [np.arange(1,i+1), np.arange(0,j), np.arange(0,k)]
@@ -46,7 +46,7 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
     print(domain)
     print(geom0)
     bsplinebasis = domain.basis('spline',
-                                degree=(1, 1, 1),
+                                degree=(2, 1, 1),
                                 knotmultiplicities=km,
                                 knotvalues=kv,
                                 periodic=[0]
@@ -76,13 +76,13 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [inner_radius, inner_radius, height],
                     [outer_radius, outer_radius, height]])
 
-    cps = np.random.rand(32,3)
+    #cps = np.random.rand(32,3)
     #print(bsplinebasis)
    
-    cps =  custom_shape.generate_cps()
+    #cps =  custom_shape.generate_cps()
     
 
-    controlweights = np.tile(np.repeat([1., 1 / np.sqrt(2)], 15), 20)
+    controlweights = np.tile(np.repeat([1., 1 / np.sqrt(2)], 4), 4)
     
 
     # Create nurbsbasis and geometry
