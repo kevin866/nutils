@@ -24,11 +24,9 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
     nutils.topology, nutils._Wrapper, nutils.function
         Domain, geometry and nurbs basis of nutils functions
     """
-
-    domain, geom0 = mesh.unitsquare([4, 1, 1],etype='mixed')
-    print(domain.basis)
-    print(geom0)
-
+    print('eys')
+    domain, geom0 = mesh.rectilinear([4, 1, 1], periodic=[0])
+    
     # Knot vector and knot multiplicities
     kv = [[0, 1, 2, 3, 4], [0, 1], [0, 1]]
     km = [[2, 2, 2, 2, 2], [2, 2], [2, 2]]
@@ -87,15 +85,12 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
     
 
     controlweights = np.tile(np.repeat([1., 1 / np.sqrt(2)], 4), 4)
-    print(controlweights.shape)
     
 
     # Create nurbsbasis and geometry
     weightfunc = bsplinebasis.dot(controlweights)
-    print('yes')
     nurbsbasis = bsplinebasis * controlweights / weightfunc
     geom = (nurbsbasis[:, np.newaxis] * cps).sum(0)
-    print('yes')
     # Refine domain nrefine times
     if nrefine:
         domain = domain.refine(nrefine)
