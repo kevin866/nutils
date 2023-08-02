@@ -122,9 +122,11 @@ print(domain.spaces)
 print(domain.ndims)
 print(domain.references)
 print(np.array(geom))
-print(geom)
+for i in np.array(geom):
+    print(i)
+print(geom.ndim)
 print(nurbsbasis.broadcasted_arrays)
-print(nurbsbasis._array)
+print(nurbsbasis.ndim)
 # shapes(5,2,2)
 """for i in range(2,10):
     for j in range(2,5):
