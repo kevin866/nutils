@@ -51,7 +51,7 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                                 knotvalues=kv,
                                 periodic=[0]
                                 )
-    cps = np.array([[inner_radius, 0, 0], [outer_radius, 0, 0],
+    """cps = np.array([[inner_radius, 0, 0], [outer_radius, 0, 0],
                     [inner_radius, 0, height], [outer_radius, 0, height],
                     [inner_radius, -inner_radius, 0],
                     [outer_radius, -outer_radius, 0],
@@ -75,8 +75,8 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [outer_radius, outer_radius, 0],
                     [inner_radius, inner_radius, height],
                     [outer_radius, outer_radius, height]])
-
-    #cps = np.random.rand(32,3)
+"""
+    cps = np.random.rand(32,3)
     #print(bsplinebasis)
    
     #cps =  custom_shape.generate_cps()
