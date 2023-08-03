@@ -112,24 +112,29 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
 
     return domain, geom, nurbsbasis
 
+def parameters():
+    # Create a hollow cylinder as geometry
+    domain, geom, nurbsbasis = get_cylinder(inner_radius=1.,
+                                            outer_radius=1.5,
+                                            height=2.0,
+                                            nrefine=None)
+    print(domain.spaces)
+    print(domain.ndims)
+    print(domain.references)
+    print(np.array(geom))
+    for i in np.array(geom):
+        print(i)
+    print(geom.ndim)
+    print(nurbsbasis.broadcasted_arrays)
+    print(nurbsbasis.ndim)
 
-# Create a hollow cylinder as geometry
-domain, geom, nurbsbasis = get_cylinder(inner_radius=1.,
-                                        outer_radius=1.5,
-                                        height=2.0,
-                                        nrefine=None)
-print(domain.spaces)
-print(domain.ndims)
-print(domain.references)
-print(np.array(geom))
-for i in np.array(geom):
-    print(i)
-print(geom.ndim)
-print(nurbsbasis.broadcasted_arrays)
-print(nurbsbasis.ndim)
-# shapes(5,2,2)
-"""for i in range(2,10):
-    for j in range(2,5):
-        shapes(i, j, 2)
-    print("yes")
-shapes(6, 4, 6)"""
+def cube_ctr():
+    points=[-1, 0, 1]
+    cps = []
+    for i in points:
+        for j in points:
+            for k in points:
+                cps.append([i, j, k])
+
+    return cps
+print(cube_ctr())
