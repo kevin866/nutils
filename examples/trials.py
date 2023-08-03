@@ -128,13 +128,15 @@ def parameters():
     print(nurbsbasis.broadcasted_arrays)
     print(nurbsbasis.ndim)
 
-def cube_ctr():
+def cube_ctr(num):
     points=[-1, 0, 1]
     cps = []
     for i in points:
         for j in points:
             for k in points:
                 cps.append([i, j, k])
+    for i in range(num-27):
+        cps.append(np.random.random(size=3))
 
     return cps
-print(cube_ctr())
+print(cube_ctr(32))

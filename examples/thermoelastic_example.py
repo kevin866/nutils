@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
 import custom_shape
+from trials import cube_ctr
 
 def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
     """Creates a periodic hollow cylinder of with defined inner and outer
@@ -77,6 +78,7 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [outer_radius, outer_radius, height]])
 """
     cps = np.random.rand(32,3)
+    cps = cube_ctr(32)
     #print(bsplinebasis)
    
     #cps =  custom_shape.generate_cps()
