@@ -4,7 +4,9 @@ import treelog
 import numpy as np
 from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
-import custom_shape
+from trials import cube_ctr
+import numpy
+from nutils import mesh
 
 def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
     """Creates a periodic hollow cylinder of with defined inner and outer
@@ -51,7 +53,7 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                                 knotvalues=kv,
                                 periodic=[0]
                                 )
-    cps = np.array([[inner_radius, 0, 0], [outer_radius, 0, 0],
+    """cps = np.array([[inner_radius, 0, 0], [outer_radius, 0, 0],
                     [inner_radius, 0, height], [outer_radius, 0, height],
                     [inner_radius, -inner_radius, 0],
                     [outer_radius, -outer_radius, 0],
@@ -75,8 +77,9 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [outer_radius, outer_radius, 0],
                     [inner_radius, inner_radius, height],
                     [outer_radius, outer_radius, height]])
-
-    #cps = np.random.rand(32,3)
+"""
+    cps = np.random.rand(32,3)
+    cps = cube_ctr(32)
     #print(bsplinebasis)
    
     #cps =  custom_shape.generate_cps()
@@ -131,16 +134,28 @@ def main(nrefine=1,
     ns = Namespace()
 
     # Create a hollow cylinder as geometry
-    domain, geom, nurbsbasis = get_cylinder(inner_radius=1.,
+    """domain, geom, nurbsbasis = get_cylinder(inner_radius=1.,
                                             outer_radius=1.5,
                                             height=2.0,
                                             nrefine=nrefine)
     ns.x = geom
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
+    integration_degree = 4"""
+    print('yes')
+    nelems = 4
+    shape = [np.linspace(0, 1, nelems + 1)]*3
+    shape = shape + np.random.random((3,5))
+    domain, geom = mesh.rectilinear(shape)
+    
+    degree = 3
+    basis = domain.basis('spline', degree=degree)
     integration_degree = 4
+    ns.x = geom
+    ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
+    print('yes')
 
     # Heat equation
-    ns.tbasis = nurbsbasis
+    ns.tbasis = basis
     ns.temperature = function.dotarg('t', ns.tbasis)
     ns.k = diffusivity
     ns.boundaryT = 5.0
@@ -187,7 +202,7 @@ def main(nrefine=1,
                 break
 
     # Elasticity problem
-    ns.ubasis = nurbsbasis.vector(domain.ndims)
+    ns.ubasis = basis.vector(domain.ndims)
     ns.u = function.dotarg('u', ns.ubasis)
 
     ns.lmbda = 2 * poisson
