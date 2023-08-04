@@ -139,4 +139,9 @@ def cube_ctr(num):
         cps.append(np.random.random(size=3))
 
     return cps
-print(cube_ctr(32))
+#print(cube_ctr(32))
+nelems = 4
+print([np.linspace(0, 1, nelems + 1)]*3)
+shape = [np.linspace(0, 1, nelems + 1)]*3
+shape = shape + np.random.random((3,5))
+print(shape)
