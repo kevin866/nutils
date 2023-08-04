@@ -17,5 +17,10 @@ def generate_cps(radius = 1, height = 5):
     
     # Show the plot
     p.show()"""
+
     return cross.points
-print(generate_cps().shape)
+points  = generate_cps()
+point_cloud = pv.PolyData(points)
+
+print(points)
+point_cloud.plot(eye_dome_lighting=True)
