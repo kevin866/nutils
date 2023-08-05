@@ -4,7 +4,10 @@ import treelog
 import numpy as np
 from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
-
+from trials import cube_ctr
+import numpy
+from nutils import mesh
+from trials import coe_p
 
 def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
     """Creates a periodic hollow cylinder of with defined inner and outer
@@ -23,20 +26,34 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
     -------
     nutils.topology, nutils._Wrapper, nutils.function
         Domain, geometry and nurbs basis of nutils functions
-    """
-
+    
     domain, geom0 = mesh.rectilinear([4, 1, 1], periodic=[0])
 
     # Knot vector and knot multiplicities
     kv = [[0, 1, 2, 3, 4], [0, 1], [0, 1]]
     km = [[2, 2, 2, 2, 2], [2, 2], [2, 2]]
-
+    print("yes")
     bsplinebasis = domain.basis('spline',
                                 degree=(2, 1, 1),
                                 knotmultiplicities=km,
                                 knotvalues=kv,
-                                periodic=[0])
-
+                                periodic=[0])"""
+    
+    i = 5
+    j = 2
+    k = 2
+    domain, geom0 = mesh.rectilinear([i-1, j-1, k-1], periodic=[0])
+    # Knot vector and knot multiplicities
+    kv = [np.arange(1,i+1), np.arange(0,j), np.arange(0,k)]
+    km = [[2]*i, [2]*j, [2]*k]
+    print(domain)
+    print(geom0)
+    bsplinebasis = domain.basis('spline',
+                                degree=(2, 1, 1),
+                                knotmultiplicities=km,
+                                knotvalues=kv,
+                                periodic=[0]
+                                )
     cps = np.array([[inner_radius, 0, 0], [outer_radius, 0, 0],
                     [inner_radius, 0, height], [outer_radius, 0, height],
                     [inner_radius, -inner_radius, 0],
@@ -61,14 +78,22 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [outer_radius, outer_radius, 0],
                     [inner_radius, inner_radius, height],
                     [outer_radius, outer_radius, height]])
+    cps = coe_p(cps, 0.1)
+    
+    # cps = np.random.rand(32,3)
+    # cps = cube_ctr(32)
+    #print(bsplinebasis)
+   
+    #cps =  custom_shape.generate_cps()
+    
 
     controlweights = np.tile(np.repeat([1., 1 / np.sqrt(2)], 4), 4)
+    
 
     # Create nurbsbasis and geometry
     weightfunc = bsplinebasis.dot(controlweights)
     nurbsbasis = bsplinebasis * controlweights / weightfunc
     geom = (nurbsbasis[:, np.newaxis] * cps).sum(0)
-
     # Refine domain nrefine times
     if nrefine:
         domain = domain.refine(nrefine)
@@ -118,9 +143,22 @@ def main(nrefine=1,
     ns.x = geom
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
     integration_degree = 4
+    basis = nurbsbasis
+    """nelems = 4
+    shape = [np.linspace(0, 1, nelems + 1)]*3
+    #shape = shape + np.random.random((3,5))
+    domain, geom = mesh.rectilinear(np.random.random((3,5)), periodic=[4])
+    
+    degree = 3
+    basis = domain.basis('spline', degree=degree)
+    integration_degree = 4
+    ns.x = geom
+    ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
+    print('yes')"""
 
     # Heat equation
-    ns.tbasis = nurbsbasis
+    
+    ns.tbasis = basis
     ns.temperature = function.dotarg('t', ns.tbasis)
     ns.k = diffusivity
     ns.boundaryT = 5.0
@@ -167,7 +205,7 @@ def main(nrefine=1,
                 break
 
     # Elasticity problem
-    ns.ubasis = nurbsbasis.vector(domain.ndims)
+    ns.ubasis = basis.vector(domain.ndims)
     ns.u = function.dotarg('u', ns.ubasis)
 
     ns.lmbda = 2 * poisson

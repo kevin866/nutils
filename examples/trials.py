@@ -143,3 +143,49 @@ def cube_ctr(num):
 def coe_p(p, alpha):
     p = (1-alpha)*p+alpha*np.random.uniform(low=-1, high=1, size=(32,3))
     return p
+import numpy
+from nutils import export, function, mesh, solver
+from nutils.expression_v2 import Namespace
+from matplotlib.pyplot import Normalize
+from matplotlib.cm import coolwarm, ScalarMappable
+def irregular_cube():
+    nelems = 4
+    stddev = 0.15
+    degree = 3
+
+    # Create a unit cube.
+    topo, cube = mesh.rectilinear([numpy.linspace(0, 1, nelems + 1)] * 3)
+
+    # Define deformed geometry `geom` in terms of a spline basis and argument `geom`.
+    basis = topo.basis('spline', degree=degree)
+    geom = basis @ function.Argument('geom', shape=(len(basis), 3))
+
+    # Initialize argument `geom` by projecting the initial geometry `cube` onto the basis.
+    args = solver.optimize('geom,', topo.integral(numpy.sum((cube - geom)**2) * function.J(cube), degree=2 * degree))
+
+    # Deform the geometry by adding a random offset to argument `geom`.
+    rng = numpy.random.default_rng(seed=0) # `seed=0` for reproducibility
+    args['geom'] = args['geom'] + rng.normal(scale=stddev, size=args['geom'].shape)
+
+    # Plot the surface of the cube.
+    smpl = topo.boundary.sample('bezier', 5)
+    x = smpl.eval(geom, **args)
+
+    #export.triplot('surface.png', x, hull=smpl.hull)
+    integration_degree = 4
+    
+    return topo, basis, integration_degree, geom
+
+
+
+def simple_cube():
+    nelems = 4
+    shape = [np.linspace(0, 1, nelems + 1)]*3
+    #shape = shape + np.random.random((3,5))
+    domain, geom = mesh.rectilinear(shape, periodic=[4])
+    print(geom)
+    
+    degree = 3
+    basis = domain.basis('spline', degree=degree)
+    integration_degree = 4
+    return domain, basis, integration_degree, geom

@@ -106,7 +106,7 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
 
     return domain, geom, nurbsbasis
 
-
+import trials
 def main(nrefine=1,
          poisson=0.3,
          diffusivity=0.01,
@@ -136,25 +136,20 @@ def main(nrefine=1,
     ns = Namespace()
 
     # Create a hollow cylinder as geometry
-    domain, geom, nurbsbasis = get_cylinder(inner_radius=1.,
+    """domain, geom, nurbsbasis = get_cylinder(inner_radius=1.,
                                             outer_radius=1.5,
                                             height=2.0,
                                             nrefine=nrefine)
     ns.x = geom
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
     integration_degree = 4
-    basis = nurbsbasis
-    """nelems = 4
-    shape = [np.linspace(0, 1, nelems + 1)]*3
-    #shape = shape + np.random.random((3,5))
-    domain, geom = mesh.rectilinear(np.random.random((3,5)), periodic=[4])
-    
-    degree = 3
-    basis = domain.basis('spline', degree=degree)
-    integration_degree = 4
-    ns.x = geom
+    basis = nurbsbasis"""
+    domain, basis, integration_degree, geom=trials.irregular_cube()
+    print('yes')
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
-    print('yes')"""
+
+
+    
 
     # Heat equation
     
@@ -172,7 +167,10 @@ def main(nrefine=1,
     # Enforce temperature on the boundary, which increases with height
     sqr = domain.boundary.integral('(temperature - boundaryT x_2)^2 dS' @ ns,
                                    degree=integration_degree)
+    print('yes')
     tcons = solver.optimize('t', sqr, droptol=1e-12)
+    print('yes')
+    
 
     boundary_constrains = domain.boundary.project(fun='boundaryT x_2' @ ns,
                                                   onto=ns.tbasis,
@@ -241,6 +239,7 @@ def main(nrefine=1,
          function.norm2(ns.u)],
         u=u_solution,
         t=t_solution)
+    
     export.vtk('deformed_cylinder', bezier.tri, X, initialT=initialT, u=normU)
 
     # Export matplotlib
