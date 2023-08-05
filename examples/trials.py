@@ -140,8 +140,6 @@ def cube_ctr(num):
 
     return cps
 #print(cube_ctr(32))
-nelems = 4
-print([np.linspace(0, 1, nelems + 1)]*3)
-shape = [np.linspace(0, 1, nelems + 1)]*3
-shape = shape + np.random.random((3,5))
-print(shape)
+def coe_p(p, alpha):
+    p = (1-alpha)*p+alpha*np.random.uniform(low=-1, high=1, size=(32,3))
+    return p
