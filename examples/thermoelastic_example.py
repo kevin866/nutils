@@ -145,7 +145,7 @@ def main(nrefine=1,
     integration_degree = 4
     basis = nurbsbasis"""
     domain, basis, integration_degree, geom=trials.irregular_cube()
-    print('yes')
+    ns.x = geom
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
 
 
@@ -167,9 +167,9 @@ def main(nrefine=1,
     # Enforce temperature on the boundary, which increases with height
     sqr = domain.boundary.integral('(temperature - boundaryT x_2)^2 dS' @ ns,
                                    degree=integration_degree)
-    print('yes')
+    print('yes1')
     tcons = solver.optimize('t', sqr, droptol=1e-12)
-    print('yes')
+    print('yes2')
     
 
     boundary_constrains = domain.boundary.project(fun='boundaryT x_2' @ ns,

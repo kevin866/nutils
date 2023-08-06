@@ -166,6 +166,8 @@ def irregular_cube():
     # Deform the geometry by adding a random offset to argument `geom`.
     rng = numpy.random.default_rng(seed=0) # `seed=0` for reproducibility
     args['geom'] = args['geom'] + rng.normal(scale=stddev, size=args['geom'].shape)
+    print(args['geom'].shape)
+    print(geom)
 
     # Plot the surface of the cube.
     smpl = topo.boundary.sample('bezier', 5)
