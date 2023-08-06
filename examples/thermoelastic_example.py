@@ -144,12 +144,34 @@ def main(nrefine=1,
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
     integration_degree = 4
     basis = nurbsbasis"""
-    domain, basis, integration_degree, geom=trials.irregular_cube()
-    ns.x = geom
-    ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
+    #domain, basis, integration_degree, geom=trials.irregular_cube()
+    nelems = 4
+    stddev = 0.15
+    degree = 3
 
-
+    # Create a unit cube.
+    domain, cube = mesh.rectilinear([numpy.linspace(0, 1, nelems + 1)] * 3)
+    print(cube)
+    # Define deformed geometry `geom` in terms of a spline basis and argument `geom`.
+    basis = domain.basis('spline', degree=degree)
+    geom = basis @ function.Argument('geom', shape=(len(basis), 3))
     
+
+    # Initialize argument `geom` by projecting the initial geometry `cube` onto the basis.
+    args = solver.optimize('geom,', domain.integral(numpy.sum((cube - geom)**2) * function.J(cube), degree=2 * degree))
+
+    # Deform the geometry by adding a random offset to argument `geom`.
+    rng = numpy.random.default_rng(seed=0) # `seed=0` for reproducibility
+    args['geom'] = args['geom'] + rng.normal(scale=stddev, size=args['geom'].shape)
+
+    # Plot the surface of the cube.
+    smpl = domain.boundary.sample('bezier', 5)
+    x = smpl.eval(geom, **args)
+    ns.x = x
+    #export.triplot('surface.png', x, hull=smpl.hull)
+    integration_degree = 4
+    
+    ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
 
     # Heat equation
     
@@ -167,10 +189,8 @@ def main(nrefine=1,
     # Enforce temperature on the boundary, which increases with height
     sqr = domain.boundary.integral('(temperature - boundaryT x_2)^2 dS' @ ns,
                                    degree=integration_degree)
-    print('yes1')
-    tcons = solver.optimize('t', sqr, droptol=1e-12)
-    print('yes2')
     
+    tcons = solver.optimize('t', sqr, droptol=1e-12)
 
     boundary_constrains = domain.boundary.project(fun='boundaryT x_2' @ ns,
                                                   onto=ns.tbasis,
@@ -182,7 +202,7 @@ def main(nrefine=1,
                           constrain=boundary_constrains,
                           ischeme='gauss9')
     solution = []
-
+    
     # Solve the heat problem
     with treelog.iter.plain(
             'timestep',
