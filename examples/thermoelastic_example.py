@@ -150,10 +150,11 @@ def main(nrefine=1,
     degree = 3
 
     # Create a unit cube.
-    domain, cube = mesh.rectilinear([numpy.linspace(0, 1, nelems + 1)] * 3)
-    print(cube)
+    domain, ns.x0 = mesh.rectilinear([numpy.linspace(0, 1, nelems + 1)] * 3)
+    ns.define_for('x0', jacobians=('dV0',))
     # Define deformed geometry `geom` in terms of a spline basis and argument `geom`.
     basis = domain.basis('spline', degree=degree)
+    ns.add_field('x', basis, shape=(domain.ndims))
     geom = basis @ function.Argument('geom', shape=(len(basis), 3))
     
 
