@@ -136,21 +136,21 @@ def main(nrefine=1,
     ns = Namespace()
 
     # Create a hollow cylinder as geometry
-    """domain, geom, nurbsbasis = get_cylinder(inner_radius=1.,
+    domain, geom, nurbsbasis = get_cylinder(inner_radius=1.,
                                             outer_radius=1.5,
                                             height=2.0,
                                             nrefine=nrefine)
     ns.x = geom
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
     integration_degree = 4
-    basis = nurbsbasis"""
+    basis = nurbsbasis
     #domain, basis, integration_degree, geom=trials.irregular_cube()
     nelems = 4
     stddev = 0.15
     degree = 3
 
     # Create a unit cube.
-    domain, ns.x0 = mesh.rectilinear([numpy.linspace(0, 1, nelems + 1)] * 3)
+    """domain, ns.x0 = mesh.rectilinear([numpy.linspace(0, 1, nelems + 1)] * 3)
     ns.define_for('x0', jacobians=('dV0',))
     # Define deformed geometry `geom` in terms of a spline basis and argument `geom`.
     basis = domain.basis('spline', degree=degree)
@@ -170,7 +170,7 @@ def main(nrefine=1,
     x = smpl.eval(geom, **args)
     ns.x = x
     #export.triplot('surface.png', x, hull=smpl.hull)
-    integration_degree = 4
+    integration_degree = 4"""
     
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS', 'dL'))
 
