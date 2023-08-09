@@ -1,14 +1,14 @@
 from nutils import function, export, mesh, solver, testing, cli
 from nutils.expression_v2 import Namespace
 import treelog
-import numpy
+import numpy as np
 from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
 
 
 def main(nelems=4,
          degree=3,
-         stddev=0.15,
+         stddev=0.25,
          nrefine=1,
          poisson=0.3,
          diffusivity=0.01,
@@ -38,7 +38,7 @@ def main(nelems=4,
     ns = Namespace()
 
     # Create a unit cube.
-    domain, ns.x0 = mesh.rectilinear([numpy.linspace(0, 1, nelems + 1)] * 3)
+    domain, ns.x0 = mesh.rectilinear([np.linspace(0, 1, nelems + 1)] * 3)
     ns.define_for('x0', jacobians=('dV0',))
 
     # Define deformed geometry `ns.x` in terms of a spline basis and argument `x`.
@@ -50,8 +50,11 @@ def main(nelems=4,
     args = solver.optimize('x,', domain.integral('(x_i - x0_i) (x_i - x0_i) dV0' @ ns, degree=2 * degree))
 
     # Deform the geometry by adding a random offset to argument `x`.
-    rng = numpy.random.default_rng(seed=0) # `seed=0` for reproducibility
-    args['x'] = args['x'] + rng.normal(scale=stddev, size=args['x'].shape)
+    rng = np.random.default_rng(seed=0) # `seed=0` for reproducibility
+    stddev = [0.15, 0.25, 0.5]
+    comp = np.array([1.0-i for i in stddev])
+    args['x'] = np.multiply(np.array(args['x']),comp) + rng.normal(loc=[2.0,1.0,0.5], scale=stddev, size=args['x'].shape)
+
 
     # Heat equation
     ns.add_field(('T', 'S'), basis)
@@ -127,7 +130,7 @@ def main(nelems=4,
     # Sample the solution and export VTK
     bezier = domain.boundary.sample('bezier', 5)
     x, X, initialT, stress, normU = bezier.eval(
-        [ns.x, ns.X, ns.T, ns.stress, numpy.linalg.norm(ns.u)],
+        [ns.x, ns.X, ns.T, ns.stress, np.linalg.norm(ns.u)],
         **args)
     export.vtk('deformed_cylinder', bezier.tri, X, initialT=initialT, u=normU)
 
@@ -135,8 +138,8 @@ def main(nelems=4,
     with export.mplfigure('displacement.png') as fig:
         ax = fig.add_subplot(111, projection='3d')
 
-        meanU = numpy.array([numpy.mean(normU[t]) for t in bezier.tri])
-        norm = Normalize(numpy.min(meanU), numpy.max(meanU))
+        meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
+        norm = Normalize(np.min(meanU), np.max(meanU))
         surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=bezier.tri)
         surf.set_fc(coolwarm(norm(meanU)))
 

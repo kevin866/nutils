@@ -78,7 +78,7 @@ def get_cylinder(inner_radius, outer_radius, height, nrefine=None):
                     [outer_radius, outer_radius, 0],
                     [inner_radius, inner_radius, height],
                     [outer_radius, outer_radius, height]])
-    cps = coe_p(cps, 0.1)
+    cps = coe_p(cps, 0.5)
     
     # cps = np.random.rand(32,3)
     # cps = cube_ctr(32)

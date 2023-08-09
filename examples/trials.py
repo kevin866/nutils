@@ -140,9 +140,11 @@ def cube_ctr(num):
 
     return cps
 #print(cube_ctr(32))
+
 def coe_p(p, alpha):
     p = (1-alpha)*p+alpha*np.random.uniform(low=-1, high=1, size=(32,3))
     return p
+
 import numpy
 from nutils import export, function, mesh, solver
 from nutils.expression_v2 import Namespace
