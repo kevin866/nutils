@@ -5,7 +5,7 @@ from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
 from matplotlib import cm
 
-nelems = 10
+nelems = 4
 stddev = 0.05
 degree = 3
 
@@ -29,8 +29,8 @@ args['geom'] = np.multiply(np.array(args['geom']),comp) + rng.normal(scale=stdde
 smpl = topo.boundary.sample('bezier', 5)
 X = smpl.eval(geom, **args)
 #export.triplot('surface.png', X, hull=smpl.hull, cmap='blue', linecolor = 'r')
-with export.mplfigure('displacement.png') as fig:
-    ax = fig.add_subplot(111, projection='3d')
+"""with export.mplfigure('displacement.png') as fig:
+    ax = fig.add_subplot(2,5,1, projection='3d')
 
     #meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
     #norm = Normalize(np.min(meanU), np.max(meanU))
@@ -40,3 +40,32 @@ with export.mplfigure('displacement.png') as fig:
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
+    """
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D  # Import 3D plotting functionality
+import numpy as np
+
+
+# Create a 4x5 grid of subplots
+num_rows = 4
+num_cols = 5
+fig = plt.figure(figsize=(11.7, 8.3), constrained_layout=True)
+
+
+
+# Fill in the rest of the subplots with the same 3D plot
+for i in range(1, num_rows * num_cols + 1):
+    ax = fig.add_subplot(4, 5, i, projection='3d')
+    surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=smpl.tri)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    ax.set_title('3D Plot')  # Add a title
+
+# Adjust spacing between subplots
+plt.subplots_adjust(wspace=0.4, hspace=0.4)
+
+# Set a title for the entire figure
+
+# Display the plot
+plt.show()
