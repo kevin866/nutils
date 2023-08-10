@@ -51,7 +51,7 @@ def main(nelems=4,
 
     # Deform the geometry by adding a random offset to argument `x`.
     rng = np.random.default_rng(seed=0) # `seed=0` for reproducibility
-    stddev = [0.15, 0.25, 0.5]
+    stddev = [0.1, 0.1, 0.1]
     comp = np.array([1.0-i for i in stddev])
     args['x'] = np.multiply(np.array(args['x']),comp) + rng.normal(loc=[2.0,1.0,0.5], scale=stddev, size=args['x'].shape)
 
