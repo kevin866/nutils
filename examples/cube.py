@@ -5,7 +5,7 @@ from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
 from matplotlib import cm
 
-nelems = 4
+nelems = 10
 stddev = 0.05
 degree = 3
 
@@ -34,7 +34,7 @@ with export.mplfigure('displacement.png') as fig:
 
     #meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
     #norm = Normalize(np.min(meanU), np.max(meanU))
-    surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=smpl.tri,cmap='Blues')
+    surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=smpl.tri)
     #surf.set_fc(coolwarm(norm(meanU)))
 
     ax.set_xlabel('x')
