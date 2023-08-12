@@ -51,8 +51,6 @@ num_rows = 4
 num_cols = 5
 fig = plt.figure(figsize=(11.7, 8.3), constrained_layout=True)
 
-
-
 # Fill in the rest of the subplots with the same 3D plot
 for i in range(1, num_rows * num_cols + 1):
     ax = fig.add_subplot(4, 5, i, projection='3d')
