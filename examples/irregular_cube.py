@@ -8,7 +8,7 @@ from matplotlib.cm import coolwarm, ScalarMappable
 
 def main(nelems=4,
          degree=3,
-         stddev=0.25,
+         stddev = [0.1, 0.1, 0.1],
          nrefine=1,
          poisson=0.3,
          diffusivity=0.01,
@@ -51,7 +51,7 @@ def main(nelems=4,
 
     # Deform the geometry by adding a random offset to argument `x`.
     rng = np.random.default_rng(seed=0) # `seed=0` for reproducibility
-    stddev = [0.1, 0.1, 0.1]
+    
     comp = np.array([1.0-i for i in stddev])
     args['x'] = np.multiply(np.array(args['x']),comp) + rng.normal(loc=[2.0,1.0,0.5], scale=stddev, size=args['x'].shape)
 
@@ -132,22 +132,51 @@ def main(nelems=4,
     x, X, initialT, stress, normU = bezier.eval(
         [ns.x, ns.X, ns.T, ns.stress, np.linalg.norm(ns.u)],
         **args)
-    export.vtk('deformed_cylinder', bezier.tri, X, initialT=initialT, u=normU)
+    # export.vtk('deformed_cylinder', bezier.tri, X, initialT=initialT, u=normU)
+    return normU, bezier, X
 
     # Export matplotlib
-    with export.mplfigure('displacement.png') as fig:
-        ax = fig.add_subplot(111, projection='3d')
+    # with export.mplfigure('displacement.png') as fig:
+        # ax = fig.add_subplot(111, projection='3d')
 
-        meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
-        norm = Normalize(np.min(meanU), np.max(meanU))
-        surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=bezier.tri)
-        surf.set_fc(coolwarm(norm(meanU)))
+        # meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
+        # norm = Normalize(np.min(meanU), np.max(meanU))
+        # surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=bezier.tri)
+        # surf.set_fc(coolwarm(norm(meanU)))
 
-        cbar = fig.colorbar(ScalarMappable(cmap=coolwarm, norm=norm), ax=ax)
-        cbar.set_label('Displacement')
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        ax.set_zlabel('z')
+        # cbar = fig.colorbar(ScalarMappable(cmap=coolwarm, norm=norm), ax=ax)
+        # cbar.set_label('Displacement')
+        # ax.set_xlabel('x')
+        # ax.set_ylabel('y')
+        # ax.set_zlabel('z')
+
+    # import matplotlib.pyplot as plt
+    # from mpl_toolkits.mplot3d import Axes3D  # Import 3D plotting functionality
+
+
+    # # Create a 4x5 grid of subplots
+    # num_rows = 4
+    # num_cols = 5
+    # fig = plt.figure(figsize=(11.7, 8.3), constrained_layout=True)
+
+    # # Fill in the rest of the subplots with the same 3D plot
+    # for i in range(1, num_rows * num_cols + 1):
+    #     ax = fig.add_subplot(4, 5, i, projection='3d')
+    #     meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
+    #     norm = Normalize(np.min(meanU), np.max(meanU))
+    #     surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=bezier.tri)
+    #     surf.set_fc(coolwarm(norm(meanU)))
+
+    #     cbar = fig.colorbar(ScalarMappable(cmap=coolwarm, norm=norm), ax=ax)
+    #     cbar.set_label('Displacement')
+    #     ax.set_xlabel('x')
+    #     ax.set_ylabel('y')
+    #     ax.set_zlabel('z')
+
+    # plt.subplots_adjust(wspace=0.4, hspace=0.4)
+
+    # plt.show()
+
 
 
 if __name__ == '__main__':
