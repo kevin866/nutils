@@ -4,7 +4,7 @@ from nutils.expression_v2 import Namespace
 from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
 from matplotlib import cm
-def get_cube(stddev = [0.1, 0.1, 0.1]):
+def get_cube(stddev = [0.1, 0.1, 0.1], seed = 0):
     nelems = 4
     degree = 3
 
@@ -19,7 +19,7 @@ def get_cube(stddev = [0.1, 0.1, 0.1]):
     args = solver.optimize('geom,', topo.integral(np.sum((cube - geom)**2) * function.J(cube), degree=2 * degree))
 
     # Deform the geometry by adding a random offset to argument `geom`.
-    rng = np.random.default_rng(seed=0) # `seed=0` for reproducibility
+    rng = np.random.default_rng(seed=seed) # `seed=0` for reproducibility
     comp = np.array([1.0-i for i in stddev])
     args['geom'] = np.multiply(np.array(args['geom']),comp) + rng.normal(scale=stddev, size=args['geom'].shape)
 

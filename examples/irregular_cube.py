@@ -14,7 +14,7 @@ def main(nelems=4,
          diffusivity=0.01,
          thermal_expansion=0.01,
          timestep=0.1,
-         endtime=0.2):
+         endtime=0.2, seed = 0):
     """The function simulates the cooling of a cylinder with non-homogeneous
     temperature. The solution of the heat equation with Dirichlet boundary
     conditions serves as initial values for a thermoelastic problem.
@@ -50,7 +50,7 @@ def main(nelems=4,
     args = solver.optimize('x,', domain.integral('(x_i - x0_i) (x_i - x0_i) dV0' @ ns, degree=2 * degree))
 
     # Deform the geometry by adding a random offset to argument `x`.
-    rng = np.random.default_rng(seed=0) # `seed=0` for reproducibility
+    rng = np.random.default_rng(seed=seed) # `seed=0` for reproducibility
     
     comp = np.array([1.0-i for i in stddev])
     args['x'] = np.multiply(np.array(args['x']),comp) + rng.normal(loc=[2.0,1.0,0.5], scale=stddev, size=args['x'].shape)

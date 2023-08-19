@@ -19,14 +19,15 @@ print(std)
 num_rows = 6
 num_cols = 4
 fig = plt.figure(figsize=(8.27,11.69), constrained_layout=True)
-normU, bezier, X = main()
-x, smpl = get_cube()
+# normU, bezier, X = main()
+# x, smpl = get_cube()
 
 # Fill in the rest of the subplots with the same 3D plot
 for i in range(1, num_rows * num_cols + 1):
     stddev=std[(i-1)//2]
+    seed = np.random.randint(0, 100, 1)
     if i % 2 !=0:
-        x, smpl = get_cube(stddev=stddev)
+        x, smpl = get_cube(stddev=stddev, seed = seed)
         ax = fig.add_subplot(6, 4, i, projection='3d')
         surf = ax.plot_trisurf(x[:, 0], x[:, 1], x[:, 2], triangles=smpl.tri)
         # ax.set_xlabel('x')
@@ -34,7 +35,7 @@ for i in range(1, num_rows * num_cols + 1):
         # ax.set_zlabel('z')
         ax.set_title('     X {X}, Y {Y}, Z {Z}'.format(X = stddev[0], Y = stddev[1], Z = stddev[2]))  # Add a title
     else:
-        normU, bezier, X = main(stddev=stddev)
+        normU, bezier, X = main(stddev=stddev, seed = seed)
         ax = fig.add_subplot(6, 4, i, projection='3d')
         meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
         norm = Normalize(np.min(meanU), np.max(meanU))
