@@ -228,7 +228,7 @@ def main(nrefine=1,
     ns.u = function.dotarg('u', ns.ubasis)
 
     ns.lmbda = 2 * poisson
-    ns.mu = 1 - poisson
+    ns.mu = 1 - 2 * poisson
     ns.alpha = thermal_expansion
     # Final temperature
     ns.finalT = 0.0
