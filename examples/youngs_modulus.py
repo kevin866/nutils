@@ -1,20 +1,20 @@
 from nutils import function, export, mesh, solver, testing, cli
 from nutils.expression_v2 import Namespace
 import treelog
-import numpy as np
+import numpy
 from matplotlib.pyplot import Normalize
 from matplotlib.cm import coolwarm, ScalarMappable
 
 
 def main(nelems=4,
          degree=3,
-         stddev = [0.1, 0.1, 0.1],
+         stddev=0.05,
          nrefine=1,
          poisson=0.3,
          diffusivity=0.01,
          thermal_expansion=0.01,
          timestep=0.1,
-         endtime=0.2, seed = 0):
+         endtime=0.2):
     """The function simulates the cooling of a cylinder with non-homogeneous
     temperature. The solution of the heat equation with Dirichlet boundary
     conditions serves as initial values for a thermoelastic problem.
@@ -38,7 +38,7 @@ def main(nelems=4,
     ns = Namespace()
 
     # Create a unit cube.
-    domain, ns.x0 = mesh.rectilinear([np.linspace(0, 1, nelems + 1)] * 3)
+    domain, ns.x0 = mesh.rectilinear([numpy.linspace(0, 1, nelems + 1)] * 3)
     ns.define_for('x0', jacobians=('dV0',))
 
     # Define deformed geometry `ns.x` in terms of a spline basis and argument `x`.
@@ -50,11 +50,8 @@ def main(nelems=4,
     args = solver.optimize('x,', domain.integral('(x_i - x0_i) (x_i - x0_i) dV0' @ ns, degree=2 * degree))
 
     # Deform the geometry by adding a random offset to argument `x`.
-    rng = np.random.default_rng(seed=seed) # `seed=0` for reproducibility
-    
-    comp = np.array([1.0-i for i in stddev])
-    args['x'] = np.multiply(np.array(args['x']),comp) + rng.normal(loc=[2.0,1.0,0.5], scale=stddev, size=args['x'].shape)
-
+    rng = numpy.random.default_rng(seed=0) # `seed=0` for reproducibility
+    args['x'] = args['x'] + rng.normal(scale=stddev, size=args['x'].shape)
 
     # Heat equation
     ns.add_field(('T', 'S'), basis)
@@ -103,9 +100,8 @@ def main(nelems=4,
     # Elasticity problem
     ns.add_field(('u', 'v'), basis, shape=(domain.ndims,))
 
-    # ns.lmbda = 2 * poisson
-    ns.lmbda = 2*poisson
-    ns.mu = 1-2*poisson
+    ns.lmbda = 2 * poisson
+    ns.mu = 1 - poisson
     ns.alpha = thermal_expansion
     # Final temperature
     ns.finalT = 0.0
@@ -131,17 +127,16 @@ def main(nelems=4,
     # Sample the solution and export VTK
     bezier = domain.boundary.sample('bezier', 5)
     x, X, initialT, stress, normU = bezier.eval(
-        [ns.x, ns.X, ns.T, ns.stress, np.linalg.norm(ns.u)],
+        [ns.x, ns.X, ns.T, ns.stress, numpy.linalg.norm(ns.u)],
         **args)
-    # export.vtk('deformed_cylinder', bezier.tri, X, initialT=initialT, u=normU)
-    
+    export.vtk('deformed_cylinder', bezier.tri, X, initialT=initialT, u=normU)
 
     # Export matplotlib
     with export.mplfigure('displacement.png') as fig:
         ax = fig.add_subplot(111, projection='3d')
 
-        meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
-        norm = Normalize(np.min(meanU), np.max(meanU))
+        meanU = numpy.array([numpy.mean(normU[t]) for t in bezier.tri])
+        norm = Normalize(numpy.min(meanU), numpy.max(meanU))
         surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=bezier.tri)
         surf.set_fc(coolwarm(norm(meanU)))
 
@@ -150,35 +145,6 @@ def main(nelems=4,
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_zlabel('z')
-    return normU, bezier, X
-
-    # import matplotlib.pyplot as plt
-    # from mpl_toolkits.mplot3d import Axes3D  # Import 3D plotting functionality
-
-
-    # # Create a 4x5 grid of subplots
-    # num_rows = 4
-    # num_cols = 5
-    # fig = plt.figure(figsize=(11.7, 8.3), constrained_layout=True)
-
-    # # Fill in the rest of the subplots with the same 3D plot
-    # for i in range(1, num_rows * num_cols + 1):
-    #     ax = fig.add_subplot(4, 5, i, projection='3d')
-    #     meanU = np.array([np.mean(normU[t]) for t in bezier.tri])
-    #     norm = Normalize(np.min(meanU), np.max(meanU))
-    #     surf = ax.plot_trisurf(X[:, 0], X[:, 1], X[:, 2], triangles=bezier.tri)
-    #     surf.set_fc(coolwarm(norm(meanU)))
-
-    #     cbar = fig.colorbar(ScalarMappable(cmap=coolwarm, norm=norm), ax=ax)
-    #     cbar.set_label('Displacement')
-    #     ax.set_xlabel('x')
-    #     ax.set_ylabel('y')
-    #     ax.set_zlabel('z')
-
-    # plt.subplots_adjust(wspace=0.4, hspace=0.4)
-
-    # plt.show()
-
 
 
 if __name__ == '__main__':
