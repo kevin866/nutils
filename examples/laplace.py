@@ -58,6 +58,8 @@ def main(nelems: int = 10,
 
     # We are now ready to implement the Laplace equation. In weak form, the
     # solution is a scalar field `u` for which ∫_Ω ∇v·∇u - ∫_Γn v f = 0 ∀ v.
+    print(dir(domain.boundary))
+    print('yes')
 
     res = domain.integral('∇_i(v) ∇_i(u) dV' @ ns, degree=degree*2)
     res -= domain.boundary['right'].integral('v cos(1) cosh(x_1) dS' @ ns, degree=degree*2)
