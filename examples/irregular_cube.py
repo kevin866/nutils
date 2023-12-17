@@ -8,7 +8,7 @@ from matplotlib.cm import coolwarm, ScalarMappable
 
 def main(nelems=4,
          degree=3,
-         stddev = [0.1, 0.1, 0.1],
+         stddev = 0.1,
          nrefine=1,
          poisson=0.3,
          diffusivity=0.01,
@@ -52,7 +52,8 @@ def main(nelems=4,
     # Deform the geometry by adding a random offset to argument `x`.
     rng = np.random.default_rng(seed=seed) # `seed=0` for reproducibility
     
-    comp = np.array([1.0-i for i in stddev])
+    # comp = np.array([1.0-i for i in stddev])
+    comp = 1-stddev
     args['x'] = np.multiply(np.array(args['x']),comp) + rng.normal(loc=[2.0,1.0,0.5], scale=stddev, size=args['x'].shape)
 
 

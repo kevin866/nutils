@@ -1311,7 +1311,6 @@ def eye(__n, dtype=float):
     -------
     :class:`Array`
     '''
-
     return diagonalize(ones([__n], dtype=dtype))
 
 

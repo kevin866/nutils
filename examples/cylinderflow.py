@@ -98,10 +98,11 @@ def main(nelems: int = 99,
     '''
 
     elemangle = 2 * numpy.pi / nelems
-    melems = round(numpy.log(extdiam) / elemangle)
+    melems = 2*round(numpy.log(extdiam) / elemangle)
     treelog.info('creating {}x{} mesh, outer radius {:.2f}'.format(melems, nelems, .5*numpy.exp(elemangle*melems)))
     domain, geom = mesh.rectilinear([melems, nelems], periodic=(1,))
     domain = domain.withboundary(inner='left', inflow=domain.boundary['right'][nelems//2:])
+    print(dir(geom))
 
     ns = Namespace()
     ns.δ = function.eye(domain.ndims)
@@ -113,7 +114,9 @@ def main(nelems: int = 99,
     ns.x_i = '.5 exp(grid_0) (sin(grid_1) δ_i0 + cos(grid_1) δ_i1)' # polar coordinates
     ns.define_for('x', gradient='∇', normal='n', jacobians=('dV', 'dS'))
     J = ns.x.grad(geom)
-    detJ = function.determinant(J)
+    print(function.__dir__())
+    # detJ = function.determinant(J)
+    detJ = numpy.linalg.det(J)
     ns.add_field(('u', 'u0', 'v'), function.vectorize([
         domain.basis('spline', degree=(degree, degree-1), removedofs=((0,), None)),
         domain.basis('spline', degree=(degree-1, degree))]) @ J.T / detJ)
